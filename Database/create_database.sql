@@ -1,0 +1,5 @@
+IF DB_ID('Empresa') IS NULL
+BEGIN
+    CREATE DATABASE Empresa;
+END
+GO

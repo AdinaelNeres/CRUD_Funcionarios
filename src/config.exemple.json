@@ -1,0 +1,6 @@
+{
+    "driver": "SQL Server",
+    "server": "NOME_SEU_COMPUTADOR",
+    "database": "Empresa",
+    "trusted_connection": "yes"
+}

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+
+.vscode/
+
+*.bak
+*.mdf
+*.ldf
+
+venv/
+
+.env
+
+src/config.json

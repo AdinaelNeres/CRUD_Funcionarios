@@ -13,7 +13,12 @@ def conectar_master():
     
     return conexao, conexao.cursor()
 
-def conectar_empresa(config):
+def conectar_empresa():
+    
+    arquivo = Path(__file__).parent/"config.json"
+    with open(arquivo, encoding="utf-8") as a:
+        config = json.load(a)
+    
     conexao = pyodbc.connect(
         f"Driver={{{config['driver']}}};"
         f"Server={config['server']};"

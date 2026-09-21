@@ -97,12 +97,10 @@ def inserir_funcionario(conexao, cursor):
         if indice in indices:
             break
         print('Departamento não encontrado.')
-        
-    sql = """INSERT INTO funcionarios
-    (nome, sobrenome, cargo, salario, data_admissao, id_departamento)
-    VALUES (?, ?, ?, ?, GETDATE(), ?);"""
     
-    cursor.execute(sql, nome, sobrenome, cargo, salario, indice)
+    cursor.execute("""
+                   EXECUTE sp_inserir_funcionario ?, ?, ?, ?, ?;
+                   """, nome, sobrenome, cargo, salario, indice)
     
     conexao.commit()
 
@@ -231,9 +229,7 @@ def excluir_funcionario(conexao, cursor):
                 break
             
             cursor.execute("""
-                        DELETE
-                        FROM funcionarios
-                        WHERE matricula = ? 
+                        EXECUTE sp_excluir_funcionario ?;
                         """, matricula)
             conexao.commit()
             print("Funcionário excluido com sucesso!")

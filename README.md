@@ -9,13 +9,16 @@
 ## Funcionalidades
 
 - Cadastro de funcionários.
-- Consulta do quadro de funcionários.
+- Listagem de funcionários funcionários.
 - Atualizar funcionário.
 - Excluir funcionário.
+- Consulta por nome
+- Exportar para excel
 
 ## Tecnologías
 
 - Python
+- Pandas
 - SQL Server
 
 # Dicas de uso

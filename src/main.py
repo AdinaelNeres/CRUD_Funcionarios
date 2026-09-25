@@ -25,7 +25,8 @@ while True:
             print("Novo funcionáfrio incluido.")
             
         case 2:
-            f.consultar_funcionarios(cursor)
+            tabela = f.converter_para_DataFrame(cursor)
+            print(f"\n{tabela.to_string(index=False)}\n")
                 
         case 3:
             f.atualizar_cadastro(conexao, cursor)
@@ -34,6 +35,12 @@ while True:
             f.excluir_funcionario(conexao, cursor)
             
         case 5:
+            f.consulta_por_nome(cursor)
+            
+        case 6:
+            tabela = f.converter_para_DataFrame(cursor)
+            tabela.to_excel("Funcionarios.xlsx", index=False)
+        case 7:
             break
         
     opcao = f.menu_voltar_sair()

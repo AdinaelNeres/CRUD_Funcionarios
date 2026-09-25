@@ -2,6 +2,7 @@ from pathlib import Path
 import textwrap
 from datetime import datetime
 import pyodbc
+import pandas as pd
 
 def gerar_database(cursor, caminho):
     with open(caminho, "r", encoding="utf-8") as arquivo:
@@ -45,23 +46,24 @@ def menu():
                                             Selecione a opção desejada:
                                             
                                             1 - Cadastrar funcionário
-                                            2 - Consultar funcionários
+                                            2 - Listar todos os funcionários
                                             3 - Atualizar cadastro
                                             4 - Excluor funcionário
-                                            5 - Sair 
+                                            5 - Consultar por nome
+                                            6 - Exportar para excel
+                                            7 - Sair 
                                             """)))
         except ValueError:
             print("Digiyte apenas números")
             continue
         
-        if opcao < 1 or opcao > 5:
+        if opcao < 1 or opcao > 7:
             print("Informe uma opção valida")
             continue
         
-        if opcao == 5:
+        else:
             break
         
-        break
     return opcao
 
 def inserir_funcionario(conexao, cursor):
@@ -104,16 +106,16 @@ def inserir_funcionario(conexao, cursor):
     
     conexao.commit()
 
-def consultar_funcionarios(cursor):
+def converter_para_DataFrame(cursor):
     
     cursor.execute("""
-                   SELECT f.matricula,
-                          f.nome,
-                          f.sobrenome,
-                          f.cargo,
-                          d.nome,
-                          salario,
-                          data_admissao
+                   SELECT f.matricula as Matrícula,
+                          f.nome as Nome,
+                          f.sobrenome as Sobrenome,
+                          f.cargo as Cargo,
+                          d.nome as Departamento,
+                          salario as Salário,
+                          data_admissao as Data_de_admissão
                     FROM funcionarios f
                     INNER JOIN departamentos d
                     ON f.id_departamento = d.id_departamento;
@@ -121,20 +123,17 @@ def consultar_funcionarios(cursor):
     
     linhas = cursor.fetchall()
     if not linhas:
-        print('Não há funcionários cadastrados!')
+        print('Não há funcionários cadastrados')
         return
-    
-    for linha in linhas:
-        print(textwrap.dedent(f"""
-                              Matricula:        {linha[0]}
-                              Nome:             {linha[1]} {linha[2]}
-                              Cargo:            {linha[3]}
-                              Departamento:     {linha[4]}
-                              Salário           R$ {linha[5]:.2f}
-                              Data de admissão: {linha[6]}
-                              ========================================
-                              """))
-    
+
+    tabela_funcionarios = pd.DataFrame.from_records(
+        linhas,
+        columns=[coluna[0] for coluna in cursor.description]
+    )
+
+    return tabela_funcionarios
+
+
 def atualizar_cadastro(conexao, cursor):
     while True:
         matricula = verificar_matricula(cursor)            
@@ -244,7 +243,7 @@ def menu_voltar_sair():
     while True:
         try:
             opcao = int(input(textwrap.dedent("""
-                                              1 - Voltar
+                                              1 - Voltar ao início
                                               2 - Sair
                                               """)))
         except ValueError:
@@ -256,7 +255,6 @@ def menu_voltar_sair():
         else:
             print("Opção invalida")
 
-            
 def verificar_matricula(cursor):
     while True:
         try:
@@ -278,4 +276,45 @@ def verificar_matricula(cursor):
             continue
                 
         return matricula
+
+def consulta_por_nome(cursor):
+    while True:
+        primeiro_nome = input("Informe o nome do funcionário: ")
+        ultimo_nome = input("Informe o sobrenome do funcicário: ")
+        
+        cursor.execute("""
+                                    SELECT f.matricula,
+                                           f.nome,
+                                           f.sobrenome,
+                                           f.cargo,
+                                           d.nome,
+                                           f.salario,
+                                           f.data_admissao
+                                    FROM funcionarios f
+                                    INNER JOIN departamentos d
+                                    ON f.id_departamento = d.id_departamento
+                                    WHERE f.nome = ? AND f.sobrenome = ?;
+                                     """, primeiro_nome, ultimo_nome)
+        
+        linhas = cursor.fetchall()
+        mensagem = f"{primeiro_nome} {ultimo_nome} não consta em nossa base"
+        mostrar_funcionario(linhas, mensagem)
+        if mostrar_funcionario(linhas, mensagem):
+            break
+    
+def mostrar_funcionario(linhas, mensagem):
+    if not linhas:
+        print(mensagem)
+        return True
+    
+    for linha in linhas:
+        print(textwrap.dedent(f"""
+                                Matricula:        {linha[0]}
+                                Nome:             {linha[1]} {linha[2]}
+                                Cargo:            {linha[3]}
+                                Departamento:     {linha[4]}
+                                Salário           R$ {linha[5]:.2f}
+                                Data de admissão: {linha[6]}
+                                ========================================
+                                """))
             
